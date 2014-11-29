@@ -3,43 +3,40 @@ package Dispatch::Class;
 use warnings;
 use strict;
 
-our $VERSION = '0.01';
-
-use Sub::Exporter -setup => {
-	exports => [
-		qw(
-			class_case
-			dispatch
-		)
-	],
-};
+our $VERSION = '0.02';
 
 use Scalar::Util qw(blessed);
 
+use parent 'Exporter::Tiny';
+our @EXPORT_OK = qw(
+    class_case
+    dispatch
+);
+
 sub class_case {
-	my @prototable = @_;
-	sub {
-		my ($x) = @_;
-		my $blessed = blessed $x;
-		my $ref = ref $x;
-		my $DOES;
-		my @table = @prototable;
-		while (my ($key, $value) = splice @table, 0, 2) {
-			return $value if
-				!defined $key ? !defined $x :
-				$key eq '*' ? 1 :
-				$key eq ':str' ? !$ref :
-				$key eq $ref ? 1 :
-				$blessed && ($DOES ||= $x->can('DOES') || 'isa', $x->$DOES($key))
-			;
-		}
-		()
-	}
+    my @prototable = @_;
+    sub {
+        my ($x) = @_;
+        my $blessed = blessed $x;
+        my $ref = ref $x;
+        my $DOES;
+        my @table = @prototable;
+        while (my ($key, $value) = splice @table, 0, 2) {
+            return $value if
+                !defined $key ? !defined $x :
+                $key eq '*' ? 1 :
+                $key eq ':str' ? !$ref :
+                $key eq $ref ? 1 :
+                $blessed && ($DOES ||= $x->can('DOES') || 'isa', $x->$DOES($key))
+            ;
+        }
+        ()
+    }
 }
 
 sub dispatch {
-	my $chk = &class_case;
-	sub { ($chk->($_[0]) || return)->($_[0]) }
+    my $chk = &class_case;
+    sub { ($chk->($_[0]) || return)->($_[0]) }
 }
 
 'ok'
@@ -168,12 +165,12 @@ list/undef if no I<KEY> matches).
 
 =back
 
-This module uses L<C<Sub::Exporter>|Sub::Exporter>, so you can rename the
+This module uses L<C<Exporter::Tiny>|Exporter::Tiny>, so you can rename the
 imported functions at L<C<use>|perlfunc/use> time.
 
 =head1 SEE ALSO
 
-L<Sub::Exporter>
+L<Exporter::Tiny>
 
 =head1 AUTHOR
 
@@ -181,7 +178,7 @@ Lukas Mai, C<< <l.mai at web.de> >>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2013 Lukas Mai.
+Copyright 2013, 2014 Lukas Mai.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published
